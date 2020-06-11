@@ -1,0 +1,36 @@
+* {
+	font-family: monospace;
+}
+
+#htbutton {
+  visibility: hidden;
+}
+
+#stbutton {
+  visibility: hidden;
+}
+
+#ddbutton {
+  visibility: hidden;
+}
+.backbutton {
+
+display: inline-block;
+vertical-align: top;
+padding: 10px 15px;
+
+border: 3px solid #fff;
+
+background-color: blue;
+font-size: 14px;
+font-weight: 700;
+text-transform: uppercase;
+text-decoration: none;
+color:#fff;
+border-radius: 10px;
+transition: background .1s linear;
+}
+.backbutton:hover {
+	background-color: black;
+	color: #fff;
+}

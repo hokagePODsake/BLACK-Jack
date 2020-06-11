@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+<title>Блэкджек</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="assets/css/stylegame.css">
+</head>
+
+<body>
+		<script src = "script.js"></script>
+		<button class="debutton" onClick="deal(1)">Ставка $1</button>		<button class="debutton" onClick="deal(5)">Ставка $5</button>		<button class="debutton" onClick="deal(10)">Ставка $10</button>		<button class="debutton" onClick="deal(20)">Ставка $20</button></br>		<div id="playermoney">$100</div>
+		Карты диллера:<div id="dealercards">.---..---.</br>|///||///|</br>|///||///|</br>|///||///|</br>'---''---'</div>
+		Очки диллера:<span id="dealerscore"></span></br>
+		Ваши карты:<div id="playercards">.---..---.</br>|///||///|</br>|///||///|</br>|///||///|</br>'---''---'</div>
+		Ваши очки:<span id="playerscore"></span></br>
+		<button id="htbutton" onClick="hit()">Взять</button>
+		<button id="stbutton" onClick="stand()">Открыть карты</button>
+		<button id="ddbutton" onClick="doubledown()">Удвоить</button>
+		<a class="backbutton" href="index.html">Вернуться на сайт</a>
+		<div id="message"></div>
+	</body>
+</html>

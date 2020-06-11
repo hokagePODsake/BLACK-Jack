@@ -1,0 +1,69 @@
+body {
+font-family: 'Montserrat', sans-serif;
+	font-size: 14px;
+	line-height: 1.6;
+	color: white;
+}
+.container {
+	width:100%; /*ширина*/
+	max-width: 1500px; /*максимальная ширина*/
+	margin: 0 auto;
+}
+
+.hello {
+	margin
+	font-size: 20px;
+	color:#fff;
+}
+
+.intro {
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: url("../images/intro.png") center no-repeat;
+}
+.header {
+	width: 100%;
+	top:0;
+	position: absolute;
+	left:0;
+	right: 0;
+}
+.header_inner {
+	display: flex;
+	justify-content: space-between; /* по разным краям */
+	align-items: center; /* По центру горизонтали */
+}
+.nav_link {
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 10px; /*отступ от кнопки слева и справа*/
+	color: #fff;
+	text-decoration: none;
+	transition: color .1s linear; /* Длительность перехода цвета при наведении */
+}
+.nav_link:hover { /* Подсветка текста при наведении hover - наведенный элемент */
+	color: #fce38a; 
+}
+.nav_link:after { /* Добавление полоски под кнопкой */
+	content: "";
+	display: block;
+	width: 100%; /* длина относительно кнопки */
+	height: 3px; /* ширина относительно кнопки */
+	opacity: 0; 
+
+	background-color: #fce38a; /* цвет полоски */
+
+	position: absolute;
+	transition: opacity .1s linear; /* задержка полоски */
+}
+.nav_link:hover:after {
+	display: block;
+	opacity: 1;
+}
+.author {
+
+}
