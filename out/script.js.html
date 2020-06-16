@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: script.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: script.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var money = 100;
+var deck = [];
+var dealercards = [];
+var playercards = [];
+var dealersuits = [];
+var playersuits = [];
+var bet = 10;
+var elems = document.getElementsByClassName('debutton');
+
+/**
+ * Нажатая кнопка Deal
+ *
+ * @param {var} playerbet - передаваемое число
+ * @returns {boolean} - true или false
+ *
+ */
+function deal(playerbet) {
+  //make sure player has enough money to play
+  if(playerbet > money){
+    document.getElementById("message").innerHTML = "Недостаточно денег!";
+    return true;
+  }
+  deck = [];
+  dealercards = [];
+  playercards = [];
+  pullcard(0);
+  pullcard(0);
+  pullcard(1);
+  pullcard(1);
+  //transfers the bet amount to the bet variable
+  bet = playerbet;
+  //Sets play buttons back to visable and hides bet buttons
+  document.getElementById("ddbutton").style.visibility = "visible";
+  document.getElementById("stbutton").style.visibility = "visible";
+  document.getElementById("htbutton").style.visibility = "visible";
+  //elementclasses are stupid and return a set, so i have to iterate through the array to hide them all
+  for(var i = 0; i != elems.length; ++i)
+  {
+    elems[i].style.visibility = "hidden"; 
+  }
+  //changes under message to display the bet amount
+  document.getElementById("message").innerHTML = "Ваша ставка $" + bet;
+  //takes bet amount from money
+  money -= bet;
+  //updates money html
+  document.getElementById("playermoney").innerHTML = "$" + money;
+  //updates double down cost
+  document.getElementById("ddbutton").innerHTML = "Удвоить -$" + bet;
+}
+
+/**
+ * Вытягивание карты
+ *
+ * @param {var} playernum - передаваемое число
+ * @returns {string} - "ERROR", информирвание об ошибке
+ *
+ */
+function pullcard(playernum) {
+  var keepgoing = true;
+  var cardpull;
+  var suit;
+  var value = 0;
+  //makes sure all cards haven't been played yet.
+  if (deck.length &lt; 52) {
+    while (keepgoing) {
+      cardpull = Math.floor((Math.random() * 52) + 1);
+      keepgoing = false;
+      //checks to see if that card was pulled from the deck previously
+      for (i = 0; i &lt; deck.length; i++) {
+        if (cardpull == deck[i]) {
+          keepgoing = true;
+        }
+      }
+    }
+    deck.push(cardpull);
+    //checks the suit of the card
+    if (cardpull &lt;= 13) {
+      suit = "@"
+    } else if (cardpull &lt;= 26) {
+      suit = "*"
+      cardpull -= 13;
+    } else if (cardpull &lt;= 39) {
+      suit = "%"
+      cardpull -= 26;
+    } else if (cardpull &lt;= 52) {
+      suit = "!"
+      cardpull -= 39;
+    }
+    //checks who the game is pulling cards for and pushes the card value and suit into the arrays
+    if (playernum == 0) {
+      dealercards.push(cardpull);
+      dealersuits.push(suit);
+      //player can't know the value of the dealer's cards, replace with a -- placeholder
+      document.getElementById("dealerscore").innerHTML = "--";
+      if (dealercards.length > 1) {
+        var passcards = dealercards.slice(1, 2);
+        var passsuits = dealersuits.slice(1, 2);
+        document.getElementById("dealercards").innerHTML = drawcards(passcards, dealersuits);
+      }
+
+    }
+    if (playernum == 1) {
+      playercards.push(cardpull);
+      playersuits.push(suit);
+      document.getElementById("playerscore").innerHTML = calcscore(playercards);
+      document.getElementById("playercards").innerHTML = drawcards(playercards, playersuits);
+    }
+    return true;
+  }
+  return "ERROR";
+}
+
+/**
+ * Добавляет карту игроку
+ *
+ */
+function hit() {
+  //adds a card for the player
+  pullcard(1);
+  document.getElementById("ddbutton").style.visibility = "hidden";
+  //calculate the score to see if the game is over
+  if (calcscore(playercards) > 21) {
+    stand();
+  }
+
+}
+
+/**
+ * Заканчивает раунд
+ *
+ */
+function stand() {
+  //hides play buttons, reveals bet buttons
+  document.getElementById("ddbutton").style.visibility = "hidden";
+  document.getElementById("stbutton").style.visibility = "hidden";
+  document.getElementById("htbutton").style.visibility = "hidden";
+  for(var i = 0; i != elems.length; ++i)
+  {
+    elems[i].style.visibility = "visible"; // hidden has to be a string
+  }
+  //plays the dealer's turn, hits up to 17 then stands
+  dealerplay();
+  
+  //calculates the scores and compares them
+  var playerend = calcscore(playercards);
+  var dealerend = calcscore(dealercards);
+  if (playerend > 21) {
+    document.getElementById("message").innerHTML = "Проигрыш!";
+  } else if (dealerend > 21 || playerend > dealerend) {
+    document.getElementById("message").innerHTML = "Вы выиграли! $" + 2 * bet;
+    money += 2 * bet;
+  } else if (dealerend == playerend) {
+    document.getElementById("message").innerHTML = "Выигрыш! $" + bet;
+    money += bet;
+  } else {
+    document.getElementById("message").innerHTML = "Вы проиграли!";
+  }
+  document.getElementById("playermoney").innerHTML = "$" + money;
+}
+
+//double down button clicked, hits once then immediately stands after doubling the bet.
+/**
+ * Удваивает ставку, дает карту и сразу же заканчивает ход
+ *
+ */
+function doubledown() {
+  //makes sure the player have enough money to double down
+  if(money &lt; bet){
+    document.getElementById("message").innerHTML = "У вас не достаточно денег!";
+    return true;
+  }
+  //doubles the bet
+  money -= bet;
+  bet *= 2;
+  hit();
+  stand();
+}
+
+//called once a stand() is reached, could shove this code in stand as that's the only time it's called, but I kind of like it seperate
+/**
+ * Вызывается один раз, когда заканчивается stand ()
+ *
+ */
+function dealerplay() {
+  while (calcscore(dealercards) &lt; 17) {
+    pullcard(0);
+  }
+  document.getElementById("dealerscore").innerHTML = calcscore(dealercards);
+  document.getElementById("dealercards").innerHTML = drawcards(dealercards, dealersuits);
+}
+
+/**
+ * Производит подсчет очков
+ * @param {Array} cards - передается массив карт
+ */
+function calcscore(cards) {
+  var aces = 0;
+  var endscore = 0;
+
+  //count cards and check for ace
+  for (i = 0; i &lt; cards.length; i++) {
+    if (cards[i] == 1 &amp;&amp; aces == 0) {
+      aces++;
+    } else { //if it's not an ace
+      if (cards[i] >= 10) {
+        endscore += 10;
+      } else {
+        endscore += cards[i];
+      }
+    }
+  }
+
+  //add ace back in if it existed
+  if (aces == 1) {
+    if (endscore + 11 > 21) {
+      endscore++;
+    } else {
+      endscore += 11;
+    }
+  }
+  return endscore;
+}
+
+/**
+ * Прорисовывает карты
+ *
+ * @param {Array} cards - массив карт
+ * @param {Array} suits - массив обложки карт
+ */
+function drawcards(cards, suits) {
+  var lines = ["", "", "", "", ""];
+  var value = [];
+  if (cards.length == 1) { //if only one card is passed we draw the first card face down
+    lines = [".---.", "|///|", "|///|", "|///|", "'---'"];
+  }
+  //topline
+  for (i = 0; i &lt; cards.length; i++) {
+    lines[0] += ".---.";
+  }
+  lines[0] += "&lt;/br>";
+
+  //2nd line (contains value)
+  for (i = 0; i &lt; cards.length; i++) {
+    lines[1] += "|" + cardvalue(cards[i]);
+    if (cardvalue(cards[i]) == 10) {
+      lines[1] += " |";
+    } else {
+      lines[1] += "&amp;nbsp; |";
+    }
+  }
+  lines[1] += "&lt;/br>";
+
+  //3rd line (contains suit)
+  for (i = 0; i &lt; cards.length; i++) {
+
+    lines[2] += "| " + suits[i] + " |";
+  }
+  lines[2] += "&lt;/br>";
+
+  //4th line (contains value)
+  for (i = 0; i &lt; cards.length; i++) {
+    if (cardvalue(cards[i]) == 10) {
+      lines[3] += "| " + cardvalue(cards[i]) + "|";
+    } else {
+      lines[3] += "| &amp;nbsp;" + cardvalue(cards[i]) + "|";
+    }
+
+  }
+  lines[3] += "&lt;/br>";
+
+  //bottom line
+  for (i = 0; i &lt; cards.length; i++) {
+    lines[4] += "'---'";
+  }
+  lines[4] += "&lt;/br>";
+  return lines[0] + lines[1] + lines[2] + lines[3] + lines[4];
+}
+
+/**
+ * Масть карты
+ *
+ * @param {var} cardnum - количество очков
+ *
+ */
+function cardvalue(cardnum) {
+  if (cardnum == 1) {
+    return "A";
+  }
+  if (cardnum == 11) {
+    return "J";
+  }
+  if (cardnum == 12) {
+    return "Q";
+  }
+  if (cardnum == 13) {
+    return "K";
+  } else return cardnum;
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#calcscore">calcscore</a></li><li><a href="global.html#cardvalue">cardvalue</a></li><li><a href="global.html#deal">deal</a></li><li><a href="global.html#dealerplay">dealerplay</a></li><li><a href="global.html#doubledown">doubledown</a></li><li><a href="global.html#drawcards">drawcards</a></li><li><a href="global.html#hit">hit</a></li><li><a href="global.html#pullcard">pullcard</a></li><li><a href="global.html#stand">stand</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Tue Jun 16 2020 18:35:16 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
